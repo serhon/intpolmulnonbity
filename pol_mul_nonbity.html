@@ -1,0 +1,597 @@
+<!--
+HTML5+JavaScript-based graphical interactive calculator of 2 polynomials' product:
+- observe "real-time" behaviour of various coefficients of the product
+as you change coefficients of the multipliers via sliders
+- adjust formulae by which scalar and vector nonbities are calculated
+- see their distributions
+- double-check results regarding inequalities between nonbities
+etc. Related to unfair 0-1-polynomials conjecture.
+
+https://github.com/serhon/intpolmulnonbity
+
+Copyright (c) 2025 IntPolMulNonbity fitters
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+<!doctype html>
+<html>
+<head>
+	<title>Polynomial Multiplication Nonbity</title>
+</head>
+<body>
+<script type="text/javascript">
+	var degP = 64;
+	var degQ = 64;
+
+	var P = new Array(degP + 1).fill(0);
+	var Q = new Array(degQ + 1).fill(0);
+	var R = new Array(degP + degQ + 1).fill(0);
+
+	var P_T = new Array(degP + 1).fill(false);
+	var Q_T = new Array(degQ + 1).fill(false);
+
+	var t = 1.0;
+	var NBlimit = 0.5;
+
+	var CANVAS_WIDTH = 600;
+	var CANVAS_HEIGHT = 40;
+
+	function leadZeros(n, z) {
+		var s = "";
+		for (var i = 0; i < z; i++) {
+			s = (n % 10) + s;
+			n = (n - (n % 10)) / 10;
+		}
+		return s;
+	}
+
+	function degree(pol) {
+		let deg = pol.length - 1;
+		while ((pol[deg] == 0) && (deg > 0)) {
+			deg--;
+		}
+		return deg;
+	}
+
+	function sum_coefs(pol) {
+		var s = 0.0;
+		var deg = pol.length - 1;
+		for (var i = 0; i <= deg; i++) {
+			s += pol[i];
+		}
+		return s;
+	}
+
+	function nonbities(pol, normalise, nb_func_id, absolutise, square) {
+		var deg = pol.length - 1;
+		var nbs = new Array(1 + deg).fill(0);
+
+		var mr = 0.0;
+		if (normalise) {
+			for (var i = 0; i <= deg; i++) {
+				mr = Math.max(mr, pol[i]);
+			}
+			if (mr > 0.0) {
+				mr = 1.0 / mr;
+			}
+		} else {
+			mr = 1.0;
+		}
+
+		switch (nb_func_id) {
+		case "entropy":
+			var nb_func = function(t) {
+				if (t == 0.0) {
+					return 0.0;
+				}
+				return -t * Math.log2(t);
+			};
+			break;
+		case "entropy_sqr":
+			var nb_func = function(t) {
+				if (t == 0.0) {
+					return 0.0;
+				}
+				return -t * t * Math.log2(t);
+			}
+			break;
+		case "dist":
+			var nb_func = function(t) {
+				return Math.min(t, 1 - t);
+			}
+			break;
+		case "sqr":
+			var nb_func = function(t) {
+				return t * (1 - t);
+			}
+			break;
+		case "sqr_sqr":
+			var nb_func = function(t) {
+				return t * t * (1 - t) * (1 - t);
+			}
+			break;
+		case "dist0_sqr1":
+			var nb_func = function(t) {
+				return t * (1 - t) * (1 - t);
+			}
+			break;
+		case "sqr0_dist1":
+			var nb_func = function(t) {
+				return t * t * (1 - t);
+			}
+		}
+
+		for (var i = 0; i <= deg; i++) {
+			cn = pol[i] * mr;
+			var nb_sc = nb_func(cn);
+			if (absolutise) {
+				nb_sc = Math.abs(nb_sc);
+			}
+			if (square) {
+				nb_sc *= nb_sc;
+			}
+			nbs[i] = nb_sc;
+		}
+
+		return nbs;
+	}
+
+	function nonbity(pol, nonbities, nb_vector_id, mult_id) {
+		switch (nb_vector_id) {
+		case "sum":
+		case "max":
+			var nb = 0.0;
+			break;
+		case "min_nz":
+			var nb = 1e100;
+			break;
+		}
+		var deg = pol.length - 1;
+
+		for (var i = 0; i <= deg; i++) {
+			var nb_sc = nonbities[i];
+			switch (nb_vector_id) {
+			case "sum":
+				nb += nb_sc;
+				break;
+			case "max":
+				nb = Math.max(nb, nb_sc);
+				break;
+			case "min_nz":
+				if (nb_sc > 0) {
+					nb = Math.min(nb, nb_sc);
+				}
+				break;
+			}
+		}
+
+		switch (mult_id) {
+		case "unit":
+			break;
+		case "sum":
+			nb *= sum_coefs(pol);
+			break;
+		case "sqr_of_sum":
+			nb *= Math.pow(sum_coefs(pol), 2.0);
+			break;
+		case "inc_deg":
+			nb *= (1 + degree(pol));
+			break;
+		case "sqr_inc_deg":
+			nb *= Math.pow(1 + degree(pol), 2.0);
+			break;
+		case "recip_sum":
+			nb /= sum_coefs(pol);
+			break;
+		case "recip_sqr_of_sum":
+			nb /= Math.pow(sum_coefs(pol), 2.0);
+			break;
+		case "recip_inc_deg":
+			nb /= (1 + degree(pol));
+			break;
+		case "recip_sqr_inc_deg":
+			nb /= Math.pow(1 + degree(pol), 2.0);
+			break;
+		}
+
+		return nb;
+	}
+
+	function drawLine(ctx, x1, y1, x2, y2, width, style) {
+		ctx.beginPath();
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		ctx.lineWidth = width;
+		ctx.strokeStyle = style;
+		ctx.stroke();
+	}
+
+	function drawMarker(ctx, x, y, radius, style) {
+		ctx.beginPath();
+		ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+		ctx.fillStyle = style;
+		ctx.fill();
+	}
+
+	function drawDistrib(ctx, vec, threshold, limit, style) {
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // clear
+		drawLine(ctx, 0, 0.5 * CANVAS_HEIGHT, CANVAS_WIDTH, 0.5 * CANVAS_HEIGHT, 1, "#202020");
+		ctx.fillStyle = "#303030";
+		let N_TICKS = 4;
+		for (var i = 0; i <= N_TICKS; i++) {
+			drawLine(ctx, (i / N_TICKS) * CANVAS_WIDTH, 0.5 * CANVAS_HEIGHT - 8, (i / N_TICKS) * CANVAS_WIDTH, 0.5 * CANVAS_HEIGHT + 8, 2, "#101010"); // ticks
+			ctx.fillText(Math.round(i * limit / 4 * 1000) / 1000, (i / N_TICKS) * CANVAS_WIDTH - 8, 0.5 * CANVAS_HEIGHT + 20);
+		}
+		drawLine(ctx, threshold * CANVAS_WIDTH / limit, 0.5 * CANVAS_HEIGHT - 12, threshold * CANVAS_WIDTH / limit, 0.5 * CANVAS_HEIGHT + 12, 3, "#008000");
+		for (var i = 0; i < vec.length; i++) {
+			drawMarker(ctx, vec[i] * CANVAS_WIDTH / limit, 0.5 * CANVAS_HEIGHT, 4.5, style);
+		}
+	}
+
+	function sync() {
+		var normalise = document.getElementById("chkNorm").checked;
+
+		var ids = ["entropy", "entropy_sqr", "dist", "sqr", "sqr_sqr", "dist0_sqr1", "sqr0_dist1"];
+		for (var i = 0; i < ids.length; i++) {
+			if (document.getElementById("rbn_func_" + ids[i]).checked) {
+				var nb_func_id = ids[i];
+				break;
+			}
+		}
+
+		var ids = ["sum", "max", "min_nz"];
+		for (var i = 0; i < ids.length; i++) {
+			if (document.getElementById("rbn_vector_" + ids[i]).checked) {
+				var nb_vector_id = ids[i];
+				break;
+			}
+		}
+
+		var absolutise = document.getElementById("chkAbs").checked;
+
+		var square = document.getElementById("chkSqr").checked;
+
+		var ids = ["unit", "sum", "sqr_of_sum", "inc_deg", "sqr_inc_deg", "recip_sum", "recip_sqr_of_sum", "recip_inc_deg", "recip_sqr_inc_deg"];
+		for (var i = 0; i < ids.length; i++) {
+			if (document.getElementById("rbn_mult_" + ids[i]).checked) {
+				var nb_mult_id = ids[i];
+				break;
+			}
+		}
+
+		var mult_mult_nonbity = document.getElementById("chkMultMult").checked;
+		var mult_prod_nonbity = document.getElementById("chkMultProd").checked;
+
+		if (t != document.getElementById("rT").value) {
+			t = parseFloat(document.getElementById("rT").value);
+			document.getElementById("tT").value = t;
+		} else if (t != document.getElementById("tT").value) {
+			t = parseFloat(document.getElementById("tT").value);
+			document.getElementById("rT").value = t;
+		}
+
+		if (NBlimit != document.getElementById("rngLimit").value) {
+			NBlimit = parseFloat(document.getElementById("rngLimit").value);
+			document.getElementById("txtLimit").value = NBlimit;
+		} else if (NBlimit != document.getElementById("txtLimit").value) {
+			NBlimit = parseFloat(document.getElementById("txtLimit").value);
+			document.getElementById("rngLimit").value = NBlimit;
+		}
+
+		for (var i = 0; i <= degP; i++) {
+			if (P[i] != document.getElementById("rP" + i).value) {
+				P[i] = parseFloat(document.getElementById("rP" + i).value);
+				document.getElementById("tP" + i).value = P[i];
+			} else if (P[i] != document.getElementById("tP" + i).value) {
+				P[i] = parseFloat(document.getElementById("tP" + i).value);
+				document.getElementById("rP" + i).value = P[i];
+			}
+		}
+		for (var i = 0; i <= degQ; i++) {
+			if (Q[i] != document.getElementById("rQ" + i).value) {
+				Q[i] = parseFloat(document.getElementById("rQ" + i).value);
+				document.getElementById("tQ" + i).value = Q[i];	
+			} else if (Q[i] != document.getElementById("tQ" + i).value) {
+				Q[i] = parseFloat(document.getElementById("tQ" + i).value);
+				document.getElementById("rQ" + i).value = Q[i];
+			}
+		}
+
+		var degP_real = degree(P);
+		var degQ_real = degree(Q);
+
+		for (var i = 0; i <= degP; i++) {
+			P_T[i] = document.getElementById("chkT_P" + i).checked;
+		}
+
+		for (var i = 0; i <= degQ; i++) {
+			Q_T[i] = document.getElementById("chkT_Q" + i).checked;
+		}
+
+		var PmulT = new Array(degP + 1).fill(0);
+		var QmulT = new Array(degQ + 1).fill(0);
+
+		for (var i = 0; i <= degP; i++) {
+			PmulT[i] = P[i] * (P_T[i] ? t : 1.0);
+		}
+		for (var i = 0; i <= degQ; i++) {
+			QmulT[i] = Q[i] * (Q_T[i] ? t : 1.0);
+		}
+
+		for (var i = 0; i <= degP_real + degQ_real; i++) {
+			R[i] = 0.0;
+			var j_min = Math.max(i - degQ_real, 0);
+			var j_max = Math.min(i, degP_real);
+			for (var j = j_min; j <= j_max; j++) {
+				R[i] += PmulT[j] * QmulT[i - j];
+			}
+			document.getElementById("mR" + i).value = Math.round(R[i] * 1000) / 1000;
+			document.getElementById("lR" + i).innerHTML = " " + Math.round(R[i] * 1000) / 1000;
+		}
+
+		for (var i = degP_real + degQ_real + 1; i <= degP + degQ; i++) {
+			R[i] = 0.0;
+			document.getElementById("mR" + i).value = 0.0;
+			document.getElementById("lR" + i).innerHTML = " " + 0.0;
+		}
+
+		document.getElementById("pP").innerHTML = "P, deg = " + degP_real + ", σ = " + Math.round(sum_coefs(PmulT) * 1000) / 1000;
+		document.getElementById("pQ").innerHTML = "Q, deg = " + degQ_real + ", σ = " + Math.round(sum_coefs(QmulT) * 1000) / 1000;
+		document.getElementById("pR").innerHTML = "R = P<sub>t</sub> × Q<sub>t</sub>, deg = " + (degP_real + degQ_real) + ", σ = " + Math.round(sum_coefs(R) * 1000000) / 1000000;
+
+		var nonbities_with_props_fn = function(pol) {
+			return nonbities(pol, normalise, nb_func_id, absolutise, square);
+		};
+
+		var nonbity_with_props_fn = function(pol, nonbities_vec, scale) {
+			return nonbity(pol, nonbities_vec, nb_vector_id, scale ? nb_mult_id : "unit")
+		}
+
+		var nonbitiesP = nonbities_with_props_fn(PmulT);
+		var nonbitiesQ = nonbities_with_props_fn(QmulT);
+		var nonbitiesR = nonbities_with_props_fn(R);
+
+		var nonbityP = nonbity_with_props_fn(PmulT, nonbitiesP, mult_mult_nonbity);
+		var nonbityQ = nonbity_with_props_fn(QmulT, nonbitiesQ, mult_mult_nonbity);
+		var nonbityR = nonbity_with_props_fn(R, nonbitiesR, mult_prod_nonbity);
+
+		document.getElementById("propNonbityP").innerHTML = "NB = " + nonbityP;
+		document.getElementById("propNonbityQ").innerHTML = "NB = " + nonbityQ;
+		document.getElementById("propNonbityR").innerHTML = "NB = " + nonbityR;
+
+		document.getElementById("parNonbitySum").innerHTML = "NB<sub>P<sub>t</sub></sub> + NB<sub>Q<sub>t</sub></sub> = " + (nonbityP + nonbityQ);
+		document.getElementById("parNonbityProd").innerHTML = "NB<sub>P<sub>t</sub></sub> × NB<sub>Q<sub>t</sub></sub> = " + (nonbityP * nonbityQ);
+
+		document.getElementById("parSurplus").innerHTML = "Surplus = NB<sub>R</sub> / (NB<sub>P<sub>t</sub></sub> × NB<sub>Q<sub>t</sub></sub>) = " + (((nonbityP > 0.0) && (nonbityQ > 0.0)) ? nonbityR / (nonbityP * nonbityQ) : "—");
+
+		var stylePolDistMark = "#800080";
+		var styleNBDistMark = "#ff0000";
+
+		drawDistrib(document.getElementById("cnvDistribP").getContext("2d"), PmulT, 0, 2, stylePolDistMark);
+		drawDistrib(document.getElementById("cnvDistribQ").getContext("2d"), QmulT, 0, 2, stylePolDistMark);
+		drawDistrib(document.getElementById("cnvDistribR").getContext("2d"), R, 0, 2, stylePolDistMark);
+
+		drawDistrib(document.getElementById("cnvDistribNBP").getContext("2d"), nonbitiesP, 0, NBlimit, styleNBDistMark);
+		drawDistrib(document.getElementById("cnvDistribNBQ").getContext("2d"), nonbitiesQ, 0, NBlimit, styleNBDistMark);
+		drawDistrib(document.getElementById("cnvDistribNBR").getContext("2d"), nonbitiesR, nonbityP * nonbityQ, NBlimit, styleNBDistMark);
+
+		var fractPureMults = 0;
+		var fractPureMultsList = "";
+		for (i = 0; i <= degP_real; i++) {
+			for (j = 0; j <= degQ_real; j++) {
+				if ( (i+j <= degP_real+degQ_real) && (PmulT[i] * QmulT[j] == R[i+j]) && (R[i+j] > 0) && (R[i+j] < 1)) {
+					fractPureMults++;
+					fractPureMultsList += "(" + i + ", " + j + ") ";
+				}	
+			}
+		}
+		document.getElementById("propFractPureMults").innerHTML = "FractPureMults: " + fractPureMults;
+		document.getElementById("propFractPureMultsList").innerHTML = "FractPureMults List: " + fractPureMultsList;
+
+	}
+
+	function mirrorP(i) {
+		document.getElementById("rP" + i).value = 1 - document.getElementById("rP" + i).value;
+		sync();
+	}
+
+	function mirrorQ(i) {
+		document.getElementById("rQ" + i).value = 1 - document.getElementById("rQ" + i).value;
+		sync();
+	}
+
+	function setPfromText() {
+		let coef_strs = document.getElementById("txtCoefs").value.split(/ +/);
+		for (let i = 0; i <= degP; i++) {
+			document.getElementById("rP" + i).value = (i < coef_strs.length) ? coef_strs[i] : 0;
+		}
+		sync();
+	}
+
+	function setQfromText() {
+		let coef_strs = document.getElementById("txtCoefs").value.split(/ +/);
+		for (let i = 0; i <= degQ; i++) {
+			document.getElementById("rQ" + i).value = (i < coef_strs.length) ? coef_strs[i] : 0;
+		}
+		sync();
+	}
+
+	function setTextfromP() {
+		degP_real = degree(P);
+		let coefs = [];
+		for (let i = 0; i <= degP_real; i++) {
+			coefs[i] = P[i];
+		}
+		document.getElementById("txtCoefs").value = coefs.join(" ");
+	}
+
+	function setTextfromQ() {
+		degQ_real = degree(Q);
+		let coefs = [];
+		for (let i = 0; i <= degQ_real; i++) {
+			coefs[i] = Q[i];
+		}
+		document.getElementById("txtCoefs").value = coefs.join(" ");
+	}
+
+	function setTextRandom() {
+		deg = Math.max(degP, degQ);
+		let coefs = [];
+		for (let i = 0; i <= deg; i++) {
+			coefs[i] = Math.round(Math.random() * 1000) / 1000;
+		}
+		document.getElementById("txtCoefs").value = coefs.join(" ");
+	}
+
+	function setTextZeros() {
+		deg = Math.max(degP, degQ);
+		let coefs = new Array(1 + deg).fill(0);
+		document.getElementById("txtCoefs").value = coefs.join(" ");
+	}
+
+	window.onload = function() {
+		sync();
+	}
+</script>
+
+	<details>
+		<summary><i>Nonbity parameters</i></summary>
+
+		<input type="checkbox" id="chkNorm" onChange="sync()"><label> Normalise {r<sub>i</sub>} by max</label>
+		<br>
+		Scalar nonbity:
+		<label><input type="radio" name="nb_func" id="rbn_func_entropy" onChange="sync()">–t×log(t) </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_entropy_sqr" onChange="sync()"> –t<sup>2</sup>×log(t) </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_dist" onChange="sync()"> min{t, 1–t} </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_sqr" checked onChange="sync()"> t×(1–t) </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_sqr_sqr" onChange="sync()"> (t×(1–t))<sup>2</sup> </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_dist0_sqr1" onChange="sync()"> t×(1–t)<sup>2</sup> </label>
+		<label><input type="radio" name="nb_func" id="rbn_func_sqr0_dist1" onChange="sync()"> t<sup>2</sup>×(1–t) </label>
+
+		<br>
+		Vector nonbity:
+		<label><input type="radio" name="nb_vector" id="rbn_vector_sum" checked onChange="sync()"> sum </label>
+		<label><input type="radio" name="nb_vector" id="rbn_vector_max" onChange="sync()"> max </label>
+		<label><input type="radio" name="nb_vector" id="rbn_vector_min_nz" onChange="sync()"> min&gt;0 </label>
+
+		<br>
+		<input type="checkbox" id="chkSqr" onChange="sync()"><label> Square scalar nonbity</label>
+		<br>
+		<input type="checkbox" id="chkAbs" checked onChange="sync()"><label> Absolutise scalar nonbity</label>
+		<br>
+		Nonbity scale multiplier:
+		<label><input type="radio" name="nb_mult" id="rbn_mult_unit" onChange="sync()"> 1 </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_sum" onChange="sync()"> σ </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_sqr_of_sum" onChange="sync()"> σ<sup>2</sup> </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_inc_deg" onChange="sync()"> 1+d </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_sqr_inc_deg" onChange="sync()"> (1+d)<sup>2</sup> </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_recip_sum" onChange="sync()"> 1/σ </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_recip_sqr_of_sum" onChange="sync()"> 1/σ<sup>2</sup> </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_recip_inc_deg" checked onChange="sync()"> 1/(1+d) </label>
+		<label><input type="radio" name="nb_mult" id="rbn_mult_recip_sqr_inc_deg" onChange="sync()"> 1/(1+d)<sup>2</sup> </label>
+
+		<br>
+		<input type="checkbox" id="chkMultMult" checked onChange="sync()"><label> Scale multiplier nonbity</label>
+		<br>
+		<input type="checkbox" id="chkMultProd" checked onChange="sync()"><label> Scale product nonbity</label>
+
+	</details>
+
+	<hr>
+
+	<label>Space-separated coefficients: </label>
+	<input id="txtCoefs" type="text" style="width: 600px;">
+	&ensp;
+	<button onClick="setPfromText()"><i>To P</i></button>
+	&ensp;
+	<button onClick="setQfromText()"><i>To Q</i></button>
+	&ensp;
+	<button onClick="setTextfromP()">From P</button>
+	&ensp;
+	<button onClick="setTextfromQ()">From Q</button>
+	&ensp;
+	<button onClick="setTextRandom()">Random</button>
+	&ensp;
+	<button onClick="setTextZeros()">Zeros</button>
+
+	<br>
+
+	<table><tr>
+		<td><label>t (0 to 1) </label><input type="range" id="rT" min=0 max=1 step=0.001 value=1 style="width: 400px"; onChange="sync()"><input id="tT" type=text value=1 style="width: 44px;" onChange="sync()"></td>
+		<td>&emsp;&emsp;&emsp;&emsp;</td>
+		<td><label>NB chart limit (0.01 to 2) </label><input type="range" id="rngLimit" min=0.01 max=2 step=0.01 value=0.5 style="width: 200px"; onChange="sync()"><input id="txtLimit" type=text value="0.5" style="width: 36px;" onChange="sync()"></td>
+	</tr></table>
+
+	<hr>
+
+	<table>
+		<tr>
+			<td style="width: 400px;"><span id="parNonbitySum"></span></td>
+			<td style="width: 400px;"><span id="parNonbityProd"></span></td>
+			<td style="width: 400px;"><span id="parSurplus"></span></td>
+		</tr>
+	</table>	
+
+	<hr>
+
+	<details>
+		<summary>Nonbity distribution charts</summary>
+
+		<table>
+			<tr><td>P<sub>t</sub></td><td><canvas id="cnvDistribP" width="600" height="40"></canvas></td><td>NB<sub>P<sub>t</sub></sub></td><td><canvas id="cnvDistribNBP" width="600" height="40"></canvas></td></tr>
+			<tr><td>Q<sub>t</sub></td><td><canvas id="cnvDistribQ" width="600" height="40"></canvas></td><td>NB<sub>Q<sub>t</sub></sub></td><td><canvas id="cnvDistribNBQ" width="600" height="40"></canvas></td></tr>
+			<tr><td>R</td><td><canvas id="cnvDistribR" width="600" height="40"></canvas></td><td>NB<sub>R</sub></td><td><canvas id="cnvDistribNBR" width="600" height="40"></canvas></td></tr>
+		</table>
+	</details>
+
+	<hr>
+
+	<table><tr>
+		<td style="width: 300px; vertical-align: top;">
+			<p id="pP">P</p>
+			<p id="propNonbityP"></p>
+<script type="text/javascript">	
+	for (var i = 0; i <= degP; i++) {
+		var inputHtml = "<label>" + leadZeros(i, 2) + " </label><input id=\"chkT_P" + i + "\" type=\"checkbox\" onChange=\"sync()\"><input id=\"rP" + i + "\" type=\"range\" min=0 max=1 step=0.001 value=0 style=\"width: 200px;\" onChange=\"sync()\" onAuxClick=\"mirrorP(" + i + ")\"><input id=\"tP" + i + "\" type=\"text\" value=0 style=\"width: 40px;\" onChange=\"sync()\"><br>";
+		document.write(inputHtml);
+	}
+</script>		
+		</td>
+		<td style="width: 300px; vertical-align: top;">
+			<p id="pQ">Q</p>
+			<p id="propNonbityQ"></p>
+<script type="text/javascript">
+	for (var i = 0; i <= degQ; i++) {
+		var inputHtml = "<label>" + leadZeros(i, 2) + " </label><input id=\"chkT_Q" + i + "\" type=\"checkbox\" onChange=\"sync()\"><input id=\"rQ" + i + "\" type=\"range\" min=0 max=1 step=0.001 value=0 style=\"width: 200px;\" onChange=\"sync()\" onAuxClick=\"mirrorQ(" + i + ")\"><input id=\"tQ" + i + "\" type=\"text\" value=0 style=\"width: 40px;\" onChange=\"sync()\"><br>";
+		document.write(inputHtml);
+	}
+</script>		
+		</td>
+		<td style="vertical-align: top;">
+			<p id="pR">R = P<sub>t</sub> × Q<sub>t</sub></p>
+			<p id="propNonbityR"></p>
+<script type="text/javascript">
+	for (var i = 0; i <= degP + degQ; i++) {
+		var inputHtml = "<label>" + leadZeros(i, 3) + " </label><meter id=\"mR" + i + "\" min=\"0\" max=\"3\" optimum=\"1\" low=\"1\" high=\"1\" value=\"0\" style=\"width: 550px;\"></meter><label id=\"lR" + i + "\"> 0</label><br>";
+		document.write(inputHtml);
+	}
+</script>		
+		</td>
+	</tr></table>
+	<p id="propFractPureMults"></p>
+	<p id="propFractPureMultsList"></p>
+
+</body>
+</html>
