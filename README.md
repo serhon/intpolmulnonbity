@@ -24,7 +24,9 @@ where $q_j \geqslant 0$, $q_{d_Q} > 0$, $r_l \geqslant 0$, $r_{d_R} > 0$, then $
 
 For the sake of simplicity, we assume that $q_j$ and $r_l$ are defined $\forall j \in \mathbb{Z}, \forall l \in \mathbb{Z}$, and
 
-$$\forall j \notin \{ 0, 1, \ldots, d_Q \}: q_j = 0, \quad \forall l \notin \{ 0, 1, \ldots, d_R \}: r_l = 0$$
+```math
+\forall j \notin \{ 0, 1, \ldots, d_Q \}: q_j = 0, \quad \forall l \notin \{ 0, 1, \ldots, d_R \}: r_l = 0
+```
 
 Consider the product $P = QR$:
 
@@ -34,7 +36,7 @@ where $d_P = \deg P = d_Q + d_R$. Obviously, $p_i \geqslant 0$, and similarly we
 
 Polynomials whose coefficients are only 0 and 1 are called *{0,1}*-polynomials or *Newman* polynomials.
 
-**Unfair 0-1-polynomials conjecture:** *Assuming that $q_0 = r_0 = 1$, if $P$ is a {0,1}-polynomial, then $Q$ and $R$ are {0,1}-polynomials as well.*
+**Unfair 0-1-polynomials conjecture:** *Assuming that $`q_0 = r_0 = 1`$, if $`P`$ is a {0,1}-polynomial, then $`Q`$ and $`R`$ are {0,1}-polynomials as well.*
 
 An *unfair pair* would be $(Q, R)$ with $q_0 = r_0 = 1$ such that $Q$ and $R$ are not {0,1}-polynomials, but their product $P$ is.
 
@@ -58,7 +60,9 @@ Surely, this feeling may be wrong, especially if unfair polynomials *exist* afte
 
 Anyway, to turn feelings into reasonings, we need quantification. "Neighborhood", "vicinity" become such with respect to certain "distance" (not a *metric* in general case, though). For the lack of established term (or our laziness to find it), we call such characteristic a (vector) *nonbity* (since each 0/1 is a *bit* value), you are welcome to call it *anti-Newmanness* or *non-{0,1}ness* or *nonbinarity* or *Newmanlessity* or *unfairness*:
 
-$$\mathcal{N}: \mathbb{R}_+[x] \mapsto \mathbb{R}_+$$
+```math
+\mathcal{N}: \mathbb{R}_+[x] \mapsto \mathbb{R}_+
+```
 
 *It can be defined in many different ways.* Here we consider the "additive" one, that is,
 
@@ -66,7 +70,9 @@ $$\mathcal{N}(P) = \sum\limits_{i = 0}^{d_P} \eta (p_i)$$
 
 where a (scalar) nonbity
 
-$$\eta : \mathbb{R}_+ \mapsto \mathbb{R}_+, \quad \eta(0) = \eta(1) = 0, \quad \forall t \in (0; 1) \cup (1; +\infty) : \eta(t) > 0$$
+```math
+\eta : \mathbb{R}_+ \mapsto \mathbb{R}_+, \quad \eta(0) = \eta(1) = 0, \quad \forall t \in (0; 1) \cup (1; +\infty) : \eta(t) > 0
+```
 
 To say nothing of $\eta$ itself, there are other ways — non-additive, non-real etc., and one of them is perhaps more appropriate for the problem at hand. Speaking of this problem, for an unfair pair we would clearly have
 
@@ -90,11 +96,15 @@ By the way, this is the single *positive* result here.
 
 Plenty of $\eta(t)$ exists that satisfy general requirements above:
 
-$$\min \{ t, |1 - t| \}, \quad t|1 - t|, \quad t|\log t|, \quad t^2 (1 - t)^2, \quad |\sin (\pi t)|, \quad t(1 - t)^2, \quad t^2 |\log t|, \quad \ldots $$
+```math
+\min \{ t, |1 - t| \}, \quad t|1 - t|, \quad t|\log t|, \quad t^2 (1 - t)^2, \quad |\sin (\pi t)|, \quad t(1 - t)^2, \quad t^2 |\log t|, \quad \ldots
+```
 
 And then there is the choice of $C$, which may depend on $q_j$ and $r_l$ (why not?):
 
-$$\frac{1}{\sum\limits_{j=0}^{d_Q} q_j \cdot \sum\limits_{l=0}^{d_R} r_l}, \quad \frac{d_P}{\sum\limits_{j=0}^{d_Q} q_j \cdot \sum\limits_{l=0}^{d_R} r_l} \quad \frac{d_P}{d_Q d_R}, \quad \frac{1 + d_P}{(1 + d_Q)(1 + d_R)}, \quad \frac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2}, \quad \ldots$$
+```math
+\frac{1}{\sum\limits_{j=0}^{d_Q} q_j \cdot \sum\limits_{l=0}^{d_R} r_l}, \quad \frac{d_P}{\sum\limits_{j=0}^{d_Q} q_j \cdot \sum\limits_{l=0}^{d_R} r_l} \quad \frac{d_P}{d_Q d_R}, \quad \frac{1 + d_P}{(1 + d_Q)(1 + d_R)}, \quad \frac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2}, \quad \ldots
+```
 
 In the absence of understanding/vision/intuition of what is appropriate and what is not, we can try these one by one, in various combinations, rejecting those for which counterexamples have been found and concentrating on attempts to prove "suspicious" ones for which they have not been... yet.
 
@@ -110,9 +120,9 @@ Any inequality has the form $\mathcal{L} \geqslant \mathcal{R}$, with e.g. $\mat
 
 Straightforward, 500+ lines of a single source `main.rs` smaller than this README contain it all. We rely on [num_cpus](https://crates.io/crates/num_cpus) to get number of logical CPUs, [rayon](https://crates.io/crates/rayon) for parallelisation and [rand](https://crates.io/crates/rand) along with [rand_xoshiro](https://crates.io/crates/rand_xoshiro) for fast generation of sufficiently random numbers.
 
-Since the mapping $P \mapsto \mathcal{N}(P)$ in all considered cases is continuous, the real coefficients of polynomials $Q$ and $R$ from any counterexample (such that $\mathcal{N}(QR) < f\bigl( \mathcal{N}(Q), \mathcal{N}(R) \bigr)$) can be replaced with their rational approximations retaining the inequality sign. Moreover, it appears that the search using, as coefficients, rationals with small denominators often finds counter- and extreme examples faster than the one using floating point numbers: the speed-up is quite noticeable, seconds vs. days, especially when "right" denominators are chosen. Uniformity of the majority of $\eta$ allows to make the next step, from rationals to integers (that's where "Int" in the name comes from). Also, the polynomials-tested-per-second rate is slightly faster thus. For these reasons the coefficients of polynomials in this implementation are `i64` instead of `f64`.
+Since the mapping $P \mapsto \mathcal{N}(P)$ in all considered cases is continuous, the real coefficients of polynomials $Q$ and $R$ from any counterexample (such that $`\mathcal{N}(QR) < f\bigl( \mathcal{N}(Q), \mathcal{N}(R) \bigr)`$) can be replaced with their rational approximations retaining the inequality sign. Moreover, it appears that the search using, as coefficients, rationals with small denominators often finds counter- and extreme examples faster than the one using floating point numbers: the speed-up is quite noticeable, seconds vs. days, especially when "right" denominators are chosen. Uniformity of the majority of $\eta$ allows to make the next step, from rationals to integers (that's where "Int" in the name comes from). Also, the polynomials-tested-per-second rate is slightly faster thus. For these reasons the coefficients of polynomials in this implementation are `i64` instead of `f64`.
 
-For example, scalar nonbity $\eta(t) = t|1 - t|$ for $t \in \mathbb{R}_+$ becomes $\eta(t) = t |D - t|$ for $t \in \mathbb{Z}_+$, $D \in \mathbb{N}$, and accordingly
+For example, scalar nonbity $`\eta(t) = t|1 - t|`$ for $`t \in \mathbb{R}_+`$ becomes $`\eta(t) = t |D - t|`$ for $`t \in \mathbb{Z}_+`$, $`D \in \mathbb{N}`$, and accordingly
 
 $$\sum\limits_{i = 0}^{d_P} p_i |1 - p_i| \bigvee C \sum\limits_{j=0}^{d_Q} q_j|1 - q_j| \cdot \sum\limits_{l=0}^{d_R} r_l|1 - r_l|$$
 
@@ -120,7 +130,7 @@ where $q_j, r_l \in [0; 1]$ and $p_i \in [0; +\infty)$, becomes internally
 
 $$\sum\limits_{i = 0}^{d_P} a_i |MN - a_i| \bigvee C \sum\limits_{j=0}^{d_Q} b_j|M - b_j| \cdot \sum\limits_{l=0}^{d_R} c_l|N - c_l|$$
 
-where $b_j \in \{ 0, 1, \ldots, M \}$, $c_l \in \{ 0, 1, \ldots, N \}$, and $a_i = \sum\limits_{k = 0}^i b_k c_{i - k} \in \mathbb{Z}_+$.
+where $`b_j \in \{ 0, 1, \ldots, M \}`$, $`c_l \in \{ 0, 1, \ldots, N \}`$, and $a_i = \sum\limits_{k = 0}^i b_k c_{i - k} \in \mathbb{Z}_+$.
 
 There are some combinatorial interpretations of such expressions, e.g. selection of squares inside big squares on diagonals of even bigger square, but whether they make understanding easier or harder is vague... And the trick does not work for essentially nonlinear nonbities like $t|\log t|$ or $|\sin (\pi t)|$, which we leave as an exercise to the reader/coder.
 
@@ -130,7 +140,7 @@ A `Searcher` instance is constructed with certain parameters (like range of poly
 
 In turn, an instance of search randomly generates a pair of polynomials $(Q, R)$, then a discrete form of gradient descent minimises $\mathcal{S}$ in 2 stages:
 
-**I.** All-coefficients-at-once: for each numerator $n_k$ of a coefficient of $Q$ and $R$ find its $\Delta_k \in \{ -1, 1 \}$ that decreases $\mathcal{S}$ the most (or rather increases it the less) and apply such $\Delta$-s simultaneously to their numerators: $n_k \leftarrow n_k + \Delta_k$. This stage continues until it becomes impossible to decrease $\mathcal{S}$.
+**I.** All-coefficients-at-once: for each numerator $n_k$ of a coefficient of $Q$ and $R$ find its $`\Delta_k \in \{ -1, 1 \}`$ that decreases $\mathcal{S}$ the most (or rather increases it the less) and apply such $\Delta$-s simultaneously to their numerators: $n_k \leftarrow n_k + \Delta_k$. This stage continues until it becomes impossible to decrease $\mathcal{S}$.
 
 **II.** One-by-one-coefficient: almost the same, but change the numerator of single coefficient at each step, the first one in the sequence $q_0, q_1, \ldots, q_{d_Q}, \quad r_0, r_1, \ldots, r_{d_R}$ whose decrement or increment strictly decreases $\mathcal{S}$.
 
@@ -154,7 +164,7 @@ Wait... wait... then press `Ctrl+C` to break.
 
 ## Customisation
 
-By default, we verify $\mathcal{N}(P) \stackrel{?}{\geqslant} C \mathcal{N}(Q) \mathcal{N}(R)$ hypothesis for $\eta(t) = t|1-t|$ (hence $\mathcal{N}(P) = \sum\limits_{i=0}^{d_P} p_i |1 - p_i|$) and $C = \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2}$ *without* the $q_0 = r_0 = 1$ constraint. No counterexamples have been found yet.
+By default, we verify $\mathcal{N}(P) \stackrel{?}{\geqslant} C \mathcal{N}(Q) \mathcal{N}(R)$ hypothesis for $\eta(t) = t|1-t|$ (hence $\mathcal{N}(P) = \sum\limits_{i=0}^{d_P} p_i |1 - p_i|$) and $`C = \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2}`$ *without* the $q_0 = r_0 = 1$ constraint. No counterexamples have been found yet.
 
 To change $\eta$, look into `nonbity()` function. Some alternatives are already there, commented.
 
@@ -182,10 +192,12 @@ Denominator of polynomial's coefficients is U-distributed in [`denom_min`; `deno
 
 [`grav_min`; `grav_max`] is the range of U-distribution of the "gravity" parameter, say $g$, that "skews" the distribution of a polynomial's coefficient $c$ toward 0 (when $g > 0$) or 1 (when $g < 0$). To be more precise,
 
-$$c = \begin{cases}
+```math
+c = \begin{cases}
 \min \{ \xi_1, \xi_2, \ldots, \xi_g \}, & g > 0,\\
 \max \{ \xi_1, \xi_2, \ldots, \xi_{-g}\}, & g < 0
-\end{cases}$$
+\end{cases}
+```
 
 where independent $\xi_i \sim U(0, 1)$. In particular, the distribution of $c$ is uniform only if $g = 0$.
 
@@ -215,17 +227,17 @@ Absence of evidence is not evidence of absence.
 
 First, counterexamples; in no particular order.
 
-We represent coefficients $q_j = b_j / D$ as a list of numerators $b_j$, then denominator $D$ follows in "( /$D$ )". Thus "$Q$: 1, 2, 0, 3, 1 ( /4 )" means $Q(x) = \frac{1}{4} + \frac{2}{4}x + \frac{3}{4}x^3 + \frac{1}{4}x^4$.
+We represent coefficients $q_j = b_j / D$ as a list of numerators $b_j$, then denominator $D$ follows in "( /$`D`$ )". Thus "$`Q`$: 1, 2, 0, 3, 1 ( /4 )" means $Q(x) = \frac{1}{4} + \frac{2}{4}x + \frac{3}{4}x^3 + \frac{1}{4}x^4$.
 
 * $Q$: **2, 1, 0, 0, 2 ( /2 )** — $Q(x) = 1 + \frac{1}{2} x + x^4$
 \
 $R$: **4, 2, 3, 0, 0, 2, 0, 0, 4 ( /4 )** — $R(x) = 1 + \frac{1}{2}x + \frac{3}{4} x^2 + \frac{1}{2}x^5 + x^8$
 \
-(Then $P(x) = 1 + x + x^2 + \dfrac{3}{8}x^3 + x^4 + x^5 + x^6 + x^8 + x^9 + x^{12}$ — single $p_i \notin \{ 0, 1 \}$.)
+(Then $P(x) = 1 + x + x^2 + \dfrac{3}{8}x^3 + x^4 + x^5 + x^6 + x^8 + x^9 + x^{12}$ — single $`p_i \notin \{ 0, 1 \}`$.)
 \
 Refutes at least:
 \
-$\mathcal{N}(P) \geqslant \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}$
+$`\mathcal{N}(P) \geqslant \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}`$
 \
 where
 \
@@ -233,7 +245,7 @@ $\mathcal{N} = \sum \eta$
 \
 $\eta(t) = \eta(1 - t)$ ($\eta(t)$ is symmetrical w.r.t. $t = \frac{1}{2}$) and $\eta(t)$ increases on $[0; \frac{1}{2}]$ (accordingly decreases on $[\frac{1}{2}; 1]$).
 
-Although $\min$ does not satisfy "$f(u, v) = 0 \Leftrightarrow u=v=0$", we've mentioned that in unfair pair both $Q$ and $R$ must have $\mathcal{N} > 0$.
+Although $\min$ does not satisfy "$`f(u, v) = 0 \Leftrightarrow u=v=0`$", we've mentioned that in unfair pair both $Q$ and $R$ must have $\mathcal{N} > 0$.
 
 Its variant, simpler but violates $p_i \leqslant 1$ requirement:
 
@@ -249,7 +261,7 @@ $R$: **4, 2, 1 ( /4 )**
 \
 Refutes at least:
 \
-$\mathcal{N}(P) \geqslant \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}$
+$`\mathcal{N}(P) \geqslant \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}`$
 \
 where
 \
@@ -265,7 +277,7 @@ $R$: **2, 0, 1, 1, ..., 1, 0, 2 ( /2 )** — $d$ ones between 2 zeros
 \
 Refutes at least:
 \
-$\mathcal{N}(P) \geqslant \gamma \max \{ \mathcal{N}(Q), \mathcal{N}(R) \}$
+$`\mathcal{N}(P) \geqslant \gamma \max \{ \mathcal{N}(Q), \mathcal{N}(R) \}`$
 \
 where
 \
@@ -273,7 +285,7 @@ $\mathcal{N} = \sum \eta$
 \
 $\eta (t)$ is... arbitrary, satisfying general requirements for scalar nonbity.
 
-For any fixed $\gamma > 0$: since the number of $r_l = \frac{1}{2}$ in $R$ is $d$, as $d \rightarrow \infty$, $\mathcal{N}(R) = d\eta(\frac{1}{2}) \rightarrow +\infty$, while in $Q$ there are none, and in $P$ there are 2, so $\mathcal{L} = \mathcal{N}(P) \equiv 2 \eta(\frac{1}{2})$ and $\mathcal{R} = \gamma \mathcal{N}(R)$; clearly, $\mathcal{S} \xrightarrow[d \rightarrow \infty]{} 0$.
+For any fixed $\gamma > 0$: since the number of $r_l = \frac{1}{2}$ in $R$ is $d$, as $d \rightarrow \infty$, $\mathcal{N}(R) = d\eta(\frac{1}{2}) \rightarrow +\infty$, while in $Q$ there are none, and in $P$ there are 2, so $\mathcal{L} = \mathcal{N}(P) \equiv 2 \eta(\frac{1}{2})$ and $\mathcal{R} = \gamma \mathcal{N}(R)$; clearly, $\mathcal{S} \rightarrow 0$ as $d \rightarrow \infty$.
 
 * $Q$: **2, 1 ( /2 )**
 \
@@ -283,7 +295,7 @@ $R$: **8, 4, 6, 5 ( /8 )**
 \
 Refutes at least:
 \
-$\mathcal{N}(P) \geqslant \max \{ \dfrac{\mathcal{N}(Q)}{\sum\limits_{j=0}^{d_Q} q_j}, \dfrac{\mathcal{N}(R)}{\sum\limits_{l=0}^{d_R} r_l} \}$
+$`\mathcal{N}(P) \geqslant \max \{ \dfrac{\mathcal{N}(Q)}{\sum\limits_{j=0}^{d_Q} q_j}, \dfrac{\mathcal{N}(R)}{\sum\limits_{l=0}^{d_R} r_l} \}`$
 \
 where
 \
@@ -297,13 +309,13 @@ $R$: **1, 1, 1, 1, 1, 1 ( /2 )**
 \
 Refutes at least:
 \
-$\mathcal{N}(P) \geqslant \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2} \mathcal{N}(Q) \mathcal{N}(R)$
+$`\mathcal{N}(P) \geqslant \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2} \mathcal{N}(Q) \mathcal{N}(R)`$
 \
 where
 \
 $\mathcal{N} = \sum \eta$
 \
-$\eta (t) = \min \{ t, |1-t| \}$
+$`\eta (t) = \min \{ t, |1-t| \}`$
 
 and 2 of its generalisations:
 
@@ -323,7 +335,7 @@ $\mathcal{N} = \sum \eta$
 \
 $\eta (t)$ is arbitrary scalar nonbity.
 
-For any fixed $\gamma > 0$ we have $C = \gamma \dfrac{5 + d_R}{5(1 + d_R)} \geqslant \gamma / 5$, $\mathcal{N}(Q) \equiv \mathrm{const} > 0$, $\mathcal{N}(P) \equiv \mathrm{const} > 0$, $\mathcal{N}(R) \xrightarrow[d_R \rightarrow \infty]{} +\infty$, so $\mathcal{S} \xrightarrow[d_R \rightarrow \infty]{} 0$.
+For any fixed $\gamma > 0$ we have $C = \gamma \dfrac{5 + d_R}{5(1 + d_R)} \geqslant \gamma / 5$, $\mathcal{N}(Q) \equiv \mathrm{const} > 0$, $\mathcal{N}(P) \equiv \mathrm{const} > 0$, $\mathcal{N}(R) \rightarrow +\infty$ as $d_R \rightarrow \infty$, so $\mathcal{S} \rightarrow 0$ as $d_R \rightarrow \infty$.
 
 * $Q$: **1, 1, 1, 1, 0, 0, ..., 0, 1, 1, 1, 1 ( /2 )** — 4 ones, zeros, 4 ones
 \
@@ -335,7 +347,7 @@ All these have $\mathcal{N} = \sum \eta$. Finally, there is one for $\mathcal{N}
 \
 $R$: $r_0 = \frac{1}{2}$, $r_{k_m} = \frac{1}{8}$, all other $r_l = 0$
 \
-where $K$ is large enough and $\{ k_m \}_{m=1}^L$ is an increasing sequence such that pairwise sums are all distinct. The simplest one is perhaps $k_m = 3^m$, but there are others, "minimal" of them being, by definition, [A025582](https://oeis.org/A025582).
+where $K$ is large enough and $`\{ k_m \}_{m=1}^L`$ is an increasing sequence such that pairwise sums are all distinct. The simplest one is perhaps $k_m = 3^m$, but there are others, "minimal" of them being, by definition, [A025582](https://oeis.org/A025582).
 \
 Refutes at least:
 \
@@ -353,7 +365,7 @@ In fact, certain denser sequence suffices, but even it has $L = 44$ and $d_R \ap
 
 Second, **hypothesised** inequalities still standing.
 
-* $\mathcal{N}(P) \stackrel{?}{\geqslant} \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2} \mathcal{N}(Q) \mathcal{N}(R)$
+* $`\mathcal{N}(P) \stackrel{?}{\geqslant} \dfrac{1 + 2\max \{ d_Q, d_R \}}{(1 + \max \{ d_Q, d_R \})^2} \mathcal{N}(Q) \mathcal{N}(R)`$
 \
 where
 \
@@ -363,7 +375,7 @@ $\eta (t) = t |1-t|$, also $\eta(t) = t^2 (1 - t)^2$
 
 $C$ here is sharp from above in the sense that $\forall \delta > 0$ $C + \delta$ fails: consider $Q = R = \alpha \in (0;1]$. $d_Q = d_R = d_P = 0 \Rightarrow C = 1$, $\mathcal{N}(Q) = \mathcal{N}(R) = \alpha (1 - \alpha)$, $\mathcal{N}(P) = \alpha^2 (1 - \alpha^2)$, therefore
 
-$$\mathcal{S} = \frac{\mathcal{N}(P)}{C \mathcal{N}(Q) \mathcal{N}(Q)} = \frac{1 + \alpha}{1 - \alpha} \xrightarrow[\alpha \rightarrow 0]{} 1$$
+$$\mathcal{S} = \frac{\mathcal{N}(P)}{C \mathcal{N}(Q) \mathcal{N}(Q)} = \frac{1 + \alpha}{1 - \alpha} \rightarrow 1, \quad \alpha \rightarrow 0$$
 
 Clearly, $\inf\limits_{\mathcal{R} > 0} \mathcal{S} \leqslant 1$, but whether there is actually equality here (then $C$ would be simply sharp), we do not know. Whether $C$ can be improved for $d_Q, d_R > 0$ is unknown to us too (current $\inf$ is $\frac{5}{4}$, attained for the penultimate counterexample above).
 
@@ -371,11 +383,11 @@ To give more meaning to this $C$, we rewrite the inequality as
 
 $$\frac{\mathcal{N}(P)}{1 + 2d} \stackrel{?}{\geqslant} \frac{\mathcal{N}(Q)}{1 + d} \cdot \frac{\mathcal{N}(R)}{1 + d}$$
 
-where $d = \max \{ \deg Q, \deg R \}$: each ratio is the average scalar nonbity of corresponding polynomial, perhaps extended with zero terms beyond its highest term.
+where $`d = \max \{ \deg Q, \deg R \}`$: each ratio is the average scalar nonbity of corresponding polynomial, perhaps extended with zero terms beyond its highest term.
 
 $\max$ is somehow important: $C = \dfrac{1 + d_P}{(1 + d_Q)(1 + d_R)}$ does not work. On the other hand, $\max$ is implied by $d_Q = d_R$.
 
-$\eta(t)$ is important too: $\eta(t) = \min \{ t, |1 - t| \}$ does not work either...
+$\eta(t)$ is important too: $`\eta(t) = \min \{ t, |1 - t| \}`$ does not work either...
 
 A refutation not only of this hypothesis, but of its entire *class* may lie somewhere along the lines of 1st counterexample above.
 
@@ -385,11 +397,11 @@ where
 \
 $\mathcal{N} = \sum \eta$
 \
-$\eta (t) = \min \{ t, |1 - t| \}$, also $\eta (t) = t |1-t|$, $\eta(t) = t^2 (1 - t)^2$
+$`\eta (t) = \min \{ t, |1 - t| \}`$, also $\eta (t) = t |1-t|$, $\eta(t) = t^2 (1 - t)^2$
 \
 with constraint $q_0 = r_0 = 1$
 
-* $\mathcal{N}(P) \stackrel{?}{\geqslant} \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}$
+* $`\mathcal{N}(P) \stackrel{?}{\geqslant} \min \{ \mathcal{N}(Q), \mathcal{N}(R) \}`$
 \
 where
 \
